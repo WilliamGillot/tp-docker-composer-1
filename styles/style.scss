@@ -5,3 +5,7 @@ body {
   font: $font-primary;
   color: $color-secondary;
 }
+
+label {
+  display: block;
+}

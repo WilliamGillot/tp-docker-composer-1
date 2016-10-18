@@ -4,7 +4,9 @@ const path = require('path')
 // Dépendances 3rd party
 const express = require('express')
 const bodyParser = require('body-parser')
+const methodOverride = require('method-override')
 const sass = require('node-sass-middleware')
+const db = require('sqlite')
 
 // Constantes et initialisations
 const PORT = process.PORT || 8080
@@ -13,6 +15,9 @@ const app = express()
 // Mise en place des vues
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
+
+// Middleware pour forcer un verbe HTTP
+app.use(methodOverride('_method'))
 
 // Middleware pour parser le body
 app.use(bodyParser.json())
@@ -28,6 +33,14 @@ app.use(sass({
 
 // On sert les fichiers statiques
 app.use(express.static(path.join(__dirname, 'assets')))
+
+// Middleware d'authentification
+app.use((req, res, next) => {
+  if(req.url == '/session')
+    next()
+  else
+    // Vérifier l'authentification
+})
 
 // La liste des différents routeurs (dans l'ordre)
 app.use('/', require('./routes/index'))
@@ -64,6 +77,14 @@ app.use(function(err, req, res, next) {
   })
 })
 
-app.listen(PORT, () => {
-  console.log('Serveur démarré sur le port : ', PORT)
+db.open('bdd.db').then(() => {
+  console.log('> BDD ouverte')
+  return db.run('CREATE TABLE IF NOT EXISTS users (pseudo, firstname, lastname, email, password)')
+}).then(() => {
+  console.log('> Table persistée')
+  app.listen(PORT, () => {
+    console.log('> Serveur démarré sur le port : ', PORT)
+  })
+}).catch((err) => {
+  console.error('ERR > ', err)
 })
