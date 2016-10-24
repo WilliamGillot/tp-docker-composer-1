@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const db = require('sqlite')
+const User = require('../models/user')
 
 /* Users : liste */
 router.get('/', function(req, res, next) {
@@ -8,8 +9,8 @@ router.get('/', function(req, res, next) {
   if (limit > 100) limit = 100
 
   Promise.all([
-    db.all('SELECT rowid, * FROM users LIMIT ? OFFSET ?', limit, offset),
-    db.get('SELECT COUNT(*) as count FROM users')
+    User.getAll(limit, offset),
+    User.count()
   ]).then((results) => {
     res.format({
       html: () => {
@@ -33,14 +34,17 @@ router.get('/', function(req, res, next) {
 })
 
 router.post('/', (req, res, next) => {
-  db.run(
-    'INSERT INTO users (pseudo, firstname, lastname, email, password) VALUES (?, ?, ?, ?, ?)',
-    req.body.pseudo,
-    req.body.firstname,
-    req.body.lastname,
-    req.body.email,
-    req.body.password
-  ).then(() => {
+  if (
+    !req.body.pseudo || req.body.pseudo === '' ||
+    !req.body.email || req.body.email === '' ||
+    !req.body.firstname || req.body.firstname === ''
+  ) {
+    let err = new Error('Bad Request')
+    err.status = 400
+    return next(err)
+  }
+
+  User.insert(req.body).then(() => {
     res.format({
       html: () => { res.redirect('/users') },
       json: () => { res.status(201).send({message: 'success'}) }
@@ -66,7 +70,7 @@ router.get('/add', function(req, res, next) {
 })
 
 router.get('/:userId(\\d+)/edit', function(req, res, next) {
-  db.get('SELECT rowid, * FROM users WHERE rowid = ?', req.params.userId).then((user) => {
+  User.get(req.params.userId).then((user) => {
     if (!user) return next()
 
     res.format({
@@ -86,7 +90,7 @@ router.get('/:userId(\\d+)/edit', function(req, res, next) {
 })
 
 router.get('/:userId(\\d+)', (req, res, next) => {
-  db.get('SELECT rowid, * FROM users WHERE rowid = ?', req.params.userId).then((user) => {
+  User.get(req.params.userId).then((user) => {
     if (!user) return next()
 
     res.format({
@@ -97,26 +101,18 @@ router.get('/:userId(\\d+)', (req, res, next) => {
 })
 
 router.put('/:userId(\\d+)', (req, res, next) => {
-  const possibleKeys = ['firstname', 'lastname', 'email', 'pseudo', 'password']
-
-  let dbArgs = []
-  let queryArgs = []
-  for (key in req.body) {
-    if (-1 !== possibleKeys.indexOf(key)) {
-      queryArgs.push(`${key} = ?`)
-      dbArgs.push(req.body[key])
-    }
-  }
-
-  dbArgs.push(req.params.userId)
-  dbArgs.unshift('UPDATE users SET ' + queryArgs.join(', ') + ' WHERE rowid = ?')
-
-  console.log('dbArgs > ', dbArgs)
-  console.log('queryArgs > ', queryArgs)
-
-  db.run.apply(db, dbArgs).then(() => {
+  User.update(req.params.userId, req.body).then(() => {
     res.format({
       html: () => { res.redirect(`/users/${req.params.userId}`) },
+      json: () => { res.status(200).send({ message: 'success' }) }
+    })
+  }).catch(next)
+})
+
+router.delete('/:userId(\\d+)', (req, res, next) => {
+  User.remove(req.params.userId).then(() => {
+    res.format({
+      html: () => { res.redirect(`/users`) },
       json: () => { res.status(200).send({ message: 'success' }) }
     })
   }).catch(next)

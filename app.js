@@ -17,7 +17,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 // Middleware pour forcer un verbe HTTP
-app.use(methodOverride('_method'))
+app.use(methodOverride('_method', { methods: [ 'POST', 'GET' ] }))
 
 // Middleware pour parser le body
 app.use(bodyParser.json())
@@ -35,12 +35,12 @@ app.use(sass({
 app.use(express.static(path.join(__dirname, 'assets')))
 
 // Middleware d'authentification
-app.use((req, res, next) => {
-  if(req.url == '/session')
-    next()
-  else
-    // Vérifier l'authentification
-})
+// app.use((req, res, next) => {
+//   if(req.url == '/session')
+//     next()
+//   else
+//     // Vérifier l'authentification
+// })
 
 // La liste des différents routeurs (dans l'ordre)
 app.use('/', require('./routes/index'))
