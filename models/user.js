@@ -1,3 +1,5 @@
+const db = require('sqlite')
+
 module.exports = {
   get: (userId) => {
     return db.get('SELECT rowid, * FROM users WHERE rowid = ?', userId)

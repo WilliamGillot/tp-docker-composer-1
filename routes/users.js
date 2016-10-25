@@ -1,5 +1,4 @@
 const router = require('express').Router()
-const db = require('sqlite')
 const User = require('../models/user')
 
 /* Users : liste */
