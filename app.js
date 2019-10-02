@@ -17,7 +17,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 // Middleware pour forcer un verbe HTTP
-app.use(methodOverride('_method', { methods: [ 'POST', 'GET' ] }))
+app.use(methodOverride('_method'))
 
 // Middleware pour parser le body
 app.use(bodyParser.json())

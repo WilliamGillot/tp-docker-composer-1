@@ -32,7 +32,7 @@ module.exports = {
     for (key in params) {
       if (-1 !== possibleKeys.indexOf(key)) {
         queryArgs.push(`${key} = ?`)
-        dbArgs.push(req.body[key])
+        dbArgs.push(params[key])
       }
     }
 
