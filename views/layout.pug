@@ -1,7 +1,20 @@
 doctype html
 html
   head
-    title= title
+    title Mon Super Site - #{title}
     link(rel='stylesheet', href='/css/style.css')
   body
-    block content
+    header
+      h1 Mon Super Site
+      section
+        h2 Menu  
+        nav
+          ul
+            li
+              a(href="/users") Gestion d'utilisateurs
+    section
+      if title
+        h2= title
+      block content
+    footer
+      block footer

@@ -14,6 +14,7 @@ router.get('/', function(req, res, next) {
     res.format({
       html: () => {
         res.render('users/index', {
+          title: 'Gestion d\'utilisateurs',
           users: results[0],
           count: results[1].count,
           limit: limit,
@@ -56,6 +57,7 @@ router.get('/add', function(req, res, next) {
   res.format({
     html: () => {
       res.render('users/edit', {
+        title: 'Ajouter un utilisateur',
         user: {},
         action: '/users'
       })
@@ -75,6 +77,7 @@ router.get('/:userId(\\d+)/edit', function(req, res, next) {
     res.format({
       html: () => {
         res.render('users/edit', {
+          title: 'Éditer un utilisateur',
           user: user,
           action: `/users/${user.rowid}?_method=put`
         })
@@ -93,7 +96,7 @@ router.get('/:userId(\\d+)', (req, res, next) => {
     if (!user) return next()
 
     res.format({
-      html: () => { res.render('users/show', { user: user }) },
+      html: () => { res.render('users/show', { user, title: `Utilisateur : ${user.pseudo}` }) },
       json: () => { res.send({ data: user }) }
     })
   }).catch(next)
