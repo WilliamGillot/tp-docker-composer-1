@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+        app:
+                image: js-dockered:latest
+                restart: on-failure
+                networks:
+                        - internal
+                deploy:
+                        replicas: 3
+
+        load-balanceur:
+                image: dockercloud/haproxy:latest
+                ports:
+                        - 8080:80
+                depends_on:
+                        - app
+                links:
+                        - app
+                networks:
+                        - internal
+                volumes:
+                        - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+        internal:
+
